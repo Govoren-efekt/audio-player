@@ -1,3 +1,9 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html, body {
   display: flex;
   height: 100vh;
@@ -11,22 +17,48 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100px;
-  height: 30px;
+  height: 22px;
 }
 
 .audio-player-progressbar {
   background-color: purple;
   width: 300px;
-  height: 30px;
+  height: 22px;
 }
 
 .audio-player-progressmeter {
   background-color: hotpink;
-  height: 30px;
+  height: 22px;
 }
 
 .audio-player {
   display: flex;
   flex-direction: row;
+  height: 300px;
+  width: 300px;
+  background-size: cover;
+}
+
+.break {
+  flex-basis: 100%;
+  height: 0;
+}
+
+.controls {
+  height: 22px;
+}
+
+select {
+  appearance: none;
+  //background-color: transparent;
+  border: none;
+  //padding: 0 1em 0 0;
+  padding: 0 1em 0 1em;
+  margin: 0;
+  // width: 100%;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: inherit;
+  line-height: inherit;
+  outline: none;
 }

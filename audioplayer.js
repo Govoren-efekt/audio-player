@@ -12,12 +12,12 @@ function createAudioPlayer() {
     init: init,
   };
 
-  function play() {
-    audioPlayer.play();
-  }
-
-  function pause() {
-    audioPlayer.pause();
+  function toggle() {
+    if (audioPlayer.duration > 0 && !audioPlayer.paused) {
+       audioPlayer.pause();
+    } else {
+       audioPlayer.play();
+    }
   }
 
   function stop() {
@@ -37,9 +37,8 @@ function createAudioPlayer() {
   }
 
   function updateTime() {
-    informationDiv.innerHTML =
-      displayTime(audioPlayer.currentTime) + ' / ' +
-      displayTime(audioPlayer.duration);
+        informationDiv.innerHTML = displayTime(audioPlayer.currentTime) + ' / '
+         + displayTime(audioPlayer.duration);
     var percent = audioPlayer.currentTime / audioPlayer.duration;
     progressmeter.style.width = (percent * progressbarWidth) + 'px';
   }
@@ -52,61 +51,60 @@ function createAudioPlayer() {
     updateTime();
   }
 
-  function playPrevious() {
-    if(currentTrack > 0) {
-      currentTrack--;
-    } else {
-      currentTrack = 0;
-    }
-    playCurrentTrack();
-  }
-
-  function playNext() {
-    if(currentTrack < trackListLen - 1) {
-      currentTrack++;
-    } else {
-      currentTrack = trackListLen - 1;
-    }
-    playCurrentTrack();
-  }
-
   function init(playerElement) {
     trackList = JSON.parse(playerElement.textContent);
     trackListLen = trackList.length;
     audioPlayer = new Audio();
-    audioPlayer.addEventListener('ended', function() {
-      playNext();
-    });
+
     audioPlayer.addEventListener('timeupdate', function() {
       updateTime();
     });
     audioPlayer.addEventListener('loadedmetadata', function() {
       updateTime();
     });
+    audioPlayer.addEventListener('pause', function() {
+      toggleButton.innerHTML = '<i class="fa fa-play" aria-hidden="true"> </i>';
+    });
+    audioPlayer.addEventListener('playing', function() {
+      toggleButton.innerHTML = '<i class="fa fa-pause" aria-hidden="true"> </i>';
+    });
+
     audioPlayer.src = trackList[currentTrack].src;
 
     var stopButton = document.createElement('button');
-    stopButton.innerHTML = '<i class="fa fa-stop" aria-hidden="true"></i>';
+    stopButton.innerHTML = '<i class="fa fa-stop" aria-hidden="true"> </i>';
     stopButton.ariaLabel = 'Stop';
+    stopButton.className = 'controls';
     stopButton.onclick = stop;
 
-    var playButton = document.createElement('button');
-    playButton.innerHTML = '<i class="fa fa-play" aria-hidden="true"></i>';
-    playButton.ariaLabel = 'Play';
-    playButton.onclick = play;
-    var pauseButton = document.createElement('button');
-    pauseButton.innerHTML = '<i class="fa fa-pause" aria-hidden="true"></i>';
-    pauseButton.ariaLabel = 'Pause';
-    pauseButton.onclick = pause;
+    var toggleButton = document.createElement('button');
+    toggleButton.innerHTML = '<i class="fa fa-play" aria-hidden="true"> </i>';
+    toggleButton.ariaLabel = 'Toggle';
+    toggleButton.className = 'controls';
+    toggleButton.onclick = toggle;
 
-    var nextButton = document.createElement('button');
-    nextButton.innerHTML = '<i class="fa fa-forward" aria-hidden="true"></i>';
-    nextButton.ariaLabel = 'Next';
-    nextButton.onclick = playNext;
-    var previousButton = document.createElement('button');
-    previousButton.innerHTML = '<i class="fa fa-backward" aria-hidden="true"></i>';
-    previousButton.ariaLabel = 'Previous';
-    previousButton.onclick = playPrevious;
+    var speedRate = document.createElement('select');
+    speedRate.className = 'controls';
+    var array = ["0.50","0.75","1.00","1.25","1.50","1.75","2.00","2.25","2.50","2.75","3.00"];
+    for (var i = 0; i < array.length; i++) {
+      var option = document.createElement("option");
+      option.value = array[i];
+      option.text = array[i] + 'x';
+      speedRate.value = "1.00"
+      speedRate.appendChild(option);
+    }
+    speedRate.addEventListener('change', function() {
+      var x = speedRate.selectedIndex;
+      audioPlayer.playbackRate = document.getElementsByTagName("option")[x].value;
+    })
+
+    var episodeCover = document.createElement('div');
+    episodeCover.className = "audio-player-cover";
+    episodeCover.style.backgroundImage = 'url('+trackList[currentTrack].cover+')';
+    //console.log(trackList[currentTrack].cover);
+
+    var breakRow = document.createElement('div');
+    breakRow.className = 'break';
 
     informationDiv = document.createElement('div');
     informationDiv.className = 'audio-player-info';
@@ -119,14 +117,12 @@ function createAudioPlayer() {
     progressbar.append(progressmeter);
 
     playerElement.innerHTML = '';
-    playerElement.append(previousButton);
+    playerElement.style.backgroundImage = 'url('+trackList[currentTrack].cover+')'
+    playerElement.append(toggleButton);
     playerElement.append(stopButton);
-    playerElement.append(playButton);
-    playerElement.append(pauseButton);
-    playerElement.append(informationDiv);
     playerElement.append(progressbar);
-    playerElement.append(nextButton);
-
+    playerElement.append(speedRate);
+    //playerElement.append(informationDiv);
     progressbarWidth = progressbar.offsetWidth;
   }
 }
